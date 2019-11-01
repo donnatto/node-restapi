@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
 
 // Get one
 router.get('/:id', getSubscriber, (req, res) => {
-  res.send(res.subscriber.name)
+  res.json(res.subscriber)
 })
 
 // Create one
@@ -32,11 +32,29 @@ router.post('/', async (req, res) => {
 })
 
 // Update one
-router.patch('/:id', (req, res) => {
+router.patch('/:id', getSubscriber, async (req, res) => {
+  if (req.body.name != null) {
+    res.subscriber.name = req.body.name
+  }
+  if (req.body.subscribedToChannel != null) {
+    res.subscriber.subscribedToChannel = req.body.subscribedToChannel
+  }
+  try {
+    const updatedSubscriber = await res.subscriber.save()
+    res.json(updatedSubscriber)
+  } catch (error) {
+    res.status(400).json({ message: error.message })
+  }
 })
 
 // Delete one
-router.delete('/:id', (req, res) => {
+router.delete('/:id', getSubscriber, async (req, res) => {
+  try {
+    await res.subscriber.remove()
+    res.json({ message: 'Deleted Subscriber'})
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
 })
 
 // Middleware
